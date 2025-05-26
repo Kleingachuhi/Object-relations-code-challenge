@@ -67,25 +67,25 @@ class Author:
         from lib.models.magazine import Magazine
         return [Magazine(row["name"], row["category"], row["id"]) for row in rows]
 
-    def __repr__(self):
-        return f"<Author {self.name} (id={self.id})>"
-    
+    def topic_areas(self):
+        """Returns unique list of categories of magazines the author has contributed to."""
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT DISTINCT m.category FROM magazines m
+            JOIN articles a ON m.id = a.magazine_id
+            WHERE a.author_id = ?
+        """, (self.id,))
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [row["category"] for row in rows]
+
     def add_article(self, magazine, title):
         """Creates and saves a new Article for this author and given magazine."""
         article = Article(title=title, author_id=self.id, magazine_id=magazine.id)
         article.save()
         return article
 
-def topic_areas(self):
-    """Returns unique list of categories of magazines the author has contributed to."""
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT DISTINCT m.category FROM magazines m
-        JOIN articles a ON m.id = a.magazine_id
-        WHERE a.author_id = ?
-    """, (self.id,))
-    rows = cursor.fetchall()
-    conn.close()
-
-    return [row["category"] for row in rows]
+    def __repr__(self):
+        return f"<Author {self.name} (id={self.id})>"

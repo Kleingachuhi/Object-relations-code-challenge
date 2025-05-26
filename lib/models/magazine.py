@@ -71,11 +71,11 @@ class Magazine:
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT a.*, COUNT(*) as article_count FROM authors a
+            SELECT a.* FROM authors a
             JOIN articles ar ON a.id = ar.author_id
             WHERE ar.magazine_id = ?
             GROUP BY a.id
-            HAVING COUNT(*) > 2
+            HAVING COUNT(ar.id) > 1
         """, (self.id,))
         rows = cursor.fetchall()
         conn.close()
